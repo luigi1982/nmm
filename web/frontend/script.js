@@ -22,20 +22,20 @@ const numbers = [
     21, 20, 19
 ];
 
+let circles = [];
+let pieces = [];
+let moving = false;
+let moving_piece = null;
+let is_player_turn = true;
+let player_send_move = false;
+let start_position = null;
+let start_num = null;
+let target_position = null;
+let target_num = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 
     const svg = document.getElementById("board");
-    var circles = [];
-    var pieces = [];
-    var moving = false;
-    var moving_piece = null;
-    var is_player_turn = true;
-    var player_send_move = false;
-    var start_position = null;
-    var start_num = null;
-    var target_position = null;
-    var target_num = null;
 
     // create all of the positions
     for (let i=0; i < positions.length; i++) {
@@ -87,12 +87,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (is_player_turn) {
 
+            console.log("From: if condition is_player_turn", is_player_turn, moving);
+
             // check if the player already send a move
             // else idle
             if (player_send_move) {
 
+                console.log("From: if condition player_send_move", is_player_turn, moving);
+                console.log(move);
+
                 // check if the send move is valid
                 if (move && move[0] == 1) {
+
+                    console.log("From: if condition move && move[0] == 1", is_player_turn, moving);
 
                     if (moving) {
 
@@ -103,8 +110,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         moving_piece.circle.setAttribute("cx", target_position[0]);
                         moving_piece.circle.setAttribute("cy", target_position[1]);
 
+                        // reset higlighting of moving piece
                         moving_piece.circle.setAttribute("stroke", "black");
                         moving_piece.circle.setAttribute("stroke-width", 1);
+
                         moving_piece = null;
                         moving = false;
 
@@ -143,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+        // logic when AI is playing a move
         } else {
 
             if (move && move[0] == -1) {
@@ -151,20 +161,64 @@ document.addEventListener("DOMContentLoaded", () => {
                 const num = move[1];
                 // get the coordinates of the field
                 const index = numbers.indexOf(num);
-                const pos = positions[index];
 
-                const new_piece = new Stone('Black', svg, pos);
-                new_piece.circle.addEventListener("click", (e) => {
+                if (move[2] == -1) {
 
-                    // here needs to be added logic to remove the enemies piece
-                    console.log("removing enemy piece");
+                    const pos = positions[index];
+                    const new_piece = new Stone('Black', svg, pos);
+                    new_piece.circle.addEventListener("click", (e) => {
 
-                });
-                new_piece.draw();
-                pieces.push(new_piece);
+                        // here needs to be added logic to remove the enemies piece
+                        console.log(`Removing enemy piece on field ${num}`);
+
+                        // send the move to the backend
+                        sendMove(num);
+
+                        // need logic to check if move valid,
+                        // i.e. selected piece not iside a mill
+                        
+                        // remove piece on the frontend
+                        new_piece.circle.remove();
+                        delete pieces[pieces.indexOf(new_piece)];
+                        
+                    });
+                    new_piece.draw();
+                    pieces.push(new_piece);
+
+                } else {
+
+                    // get the target position
+                    const to_num = move[2];
+                    const idx = numbers.indexOf(to_num);
+                    const position = positions[idx];
+
+                    // search for the piece that has been moved
+                    // then execute move
+                    pieces.forEach(piece => {
+                        if (piece.num == num) {
+                            moving_piece.circle.setAttribute("cx", position[0]);
+                            moving_piece.circle.setAttribute("cy", position[1]);
+                        }
+                    })
+
+                }
 
                 is_player_turn = true;
             }
+        }
+
+        // logic when piece is being removed
+        // a remove is indicated by 10
+        // search for the corresponding piece in pieces and delete
+        if (move && move[0] == 10) {
+            let idx = null;
+            pieces.forEach(piece => {
+                if (piece.num == move[1]) {
+                    piece.circle.remove();
+                    idx = pieces.indexOf(piece);
+                }
+            })
+            delete pieces[idx];
         }
     }, 500);
 
