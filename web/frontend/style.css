@@ -1,0 +1,13 @@
+.board-point {
+  transition: transform 2s ease;
+  transform-origin: center;
+}
+
+.board-point:hover {
+  r: 12;
+  cursor: pointer;
+}
+
+.piece {
+  transition: cx 180ms linear, cy 180ms linear;
+}

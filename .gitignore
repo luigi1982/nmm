@@ -1,0 +1,4 @@
+/nmm-rust/target
+/web/node_modules
+
+.env

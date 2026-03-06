@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <script src="script.js"></script>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div style="margin: auto; width: 400px; height: 400px; align-items: center;">
+            <svg height="400" width="400" id="board">
+
+                <!--3 layers-->
+                <rect width="350" height="350" x="25" y="25" style="fill:rgb(255, 249, 169);stroke-width:3;stroke:rgb(0, 0, 0)"></rect>
+                <rect width="250" height="250" x="75" y="75" style="fill:rgb(255, 249, 169);stroke-width:3;stroke:rgb(0, 0, 0)"></rect>
+                <rect width="150" height="150" x="125" y="125" style="fill:rgb(255, 249, 169);stroke-width:3;stroke:rgb(0, 0, 0)"></rect>
+
+                <!--Lines connecting layers-->
+                <line x1="25" y1="200" x2="125" y2="200" style="stroke:rgb(0, 0, 0);stroke-width:3"></line>
+                <line x1="200" y1="25" x2="200" y2="125" style="stroke:rgb(0, 0, 0);stroke-width:3"></line>
+                <line x1="275" y1="200" x2="375" y2="200" style="stroke:rgb(0, 0, 0);stroke-width:3"></line>
+                <line x1="200" y1="275" x2="200" y2="375" style="stroke:rgb(0, 0, 0);stroke-width:3"></line>
+
+                <!-- draw circles -->
+            </svg>
+        </div>
+    </body>
+</html>
