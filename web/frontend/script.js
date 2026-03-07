@@ -36,6 +36,7 @@ let target_num = null;
 document.addEventListener("DOMContentLoaded", () => {
 
     const svg = document.getElementById("board");
+    const hint = document.getElementById("hint");
 
     // create all of the positions
     for (let i=0; i < positions.length; i++) {
@@ -83,143 +84,148 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setInterval( async function () {
 
-        const move = await refreshOutput();
+        const moves = await refreshOutput();
 
-        if (is_player_turn) {
+        moves.forEach( move => {
 
-            console.log("From: if condition is_player_turn", is_player_turn, moving);
+            if (is_player_turn) {
 
-            // check if the player already send a move
-            // else idle
-            if (player_send_move) {
+                // check if the player already send a move
+                // else idle
+                if (player_send_move) {
 
-                console.log("From: if condition player_send_move", is_player_turn, moving);
-                console.log(move);
+                    console.log(move);
 
-                // check if the send move is valid
-                if (move && move[0] == 1) {
+                    // check if the send move is valid
+                    if (move[0] == 1) {
 
-                    console.log("From: if condition move && move[0] == 1", is_player_turn, moving);
+                        if (moving) {
 
-                    if (moving) {
+                            // move piece on frontend
+                            console.log("Moving piece!");
+                            moving_piece.num = target_num;
+                            moving_piece.position = target_position;
+                            moving_piece.circle.setAttribute("cx", target_position[0]);
+                            moving_piece.circle.setAttribute("cy", target_position[1]);
 
-                        // move piece on frontend
-                        console.log("Moving piece!");
-                        moving_piece.num = target_num;
-                        moving_piece.position = target_position;
-                        moving_piece.circle.setAttribute("cx", target_position[0]);
-                        moving_piece.circle.setAttribute("cy", target_position[1]);
+                            // reset highlighting of moving piece
+                            moving_piece.circle.setAttribute("stroke", "black");
+                            moving_piece.circle.setAttribute("stroke-width", 1);
 
-                        // reset higlighting of moving piece
-                        moving_piece.circle.setAttribute("stroke", "black");
-                        moving_piece.circle.setAttribute("stroke-width", 1);
+                            moving_piece = null;
+                            moving = false;
 
-                        moving_piece = null;
-                        moving = false;
+                        } else {
 
-                    } else {
+                            // draw piece on frontend
+                            const new_piece = new Stone('White', svg, target_position, target_num);
+                            new_piece.circle.addEventListener("click", (e) => {
+                                moving = true;
 
-                        // draw piece on frontend
-                        const new_piece = new Stone('White', svg, target_position, target_num);
+                                // if another piece was clicked before, reset
+                                if (moving_piece) {
+                                    moving_piece.circle.setAttribute("stroke", "black");
+                                    moving_piece.circle.setAttribute("stroke-width", 1);
+                                }
+
+                                // change stroke color to mark moving piece
+                                new_piece.circle.setAttribute("stroke", "red");
+                                new_piece.circle.setAttribute("stroke-width", 3);
+
+                                moving_piece = new_piece;
+                            });
+                            new_piece.draw();
+                            pieces.push(new_piece);
+
+                        }
+
+                        is_player_turn = false;
+                        player_send_move = false;
+
+                        hint.innerHTML = "Enemy turn";
+                        
+                    } else if (move[0] == 0) {
+
+                        // move is not valid
+                        // player needs to send a new move
+                        player_send_move = false;
+                    }
+                }
+
+            // logic when AI is playing a move
+            } else {
+
+                if (move[0] == -1) {
+
+                    // get the number of the field where stone was placed
+                    const num = move[1];
+                    // get the coordinates of the field
+                    const index = numbers.indexOf(num);
+
+                    if (move[2] == -1) {
+
+                        const pos = positions[index];
+                        const new_piece = new Stone('Black', svg, pos, num);
                         new_piece.circle.addEventListener("click", (e) => {
-                            moving = true;
 
-                            // if another piece was clicked before, reset
-                            if (moving_piece) {
-                                moving_piece.circle.setAttribute("stroke", "black");
-                                moving_piece.circle.setAttribute("stroke-width", 1);
-                            }
+                            // send the move to the backend
+                            sendMove(num);
 
-                            // change stroke color to mark moving piece
-                            new_piece.circle.setAttribute("stroke", "red");
-                            new_piece.circle.setAttribute("stroke-width", 3);
-
-                            moving_piece = new_piece;
+                            // need logic to check if move valid,
+                            // i.e. selected piece not inside a mill
+                            
+                            // remove piece on the frontend
+                            new_piece.circle.remove();
+                            delete pieces[pieces.indexOf(new_piece)];
+                            
                         });
                         new_piece.draw();
                         pieces.push(new_piece);
 
+                    } else {
+
+                        // get the target position
+                        const to_num = move[2];
+                        const idx = numbers.indexOf(to_num);
+                        const position = positions[idx];
+
+                        // search for the piece that has been moved
+                        // then execute move
+                        pieces.forEach(piece => {
+                            console.log(piece.num);
+                            if (piece.num == num) {
+                                piece.circle.setAttribute("cx", position[0]);
+                                piece.circle.setAttribute("cy", position[1]);
+                                piece.num = to_num;
+                            }
+                        })
+
                     }
 
-                    is_player_turn = false;
-                    player_send_move = false;
+                    is_player_turn = true;
+                    hint.innerHTML = "Your turn";
                     
-                } else if (move && move[0] == 0) {
-
-                    // move is not valid
-                    // player needs to send a new move
-                    player_send_move = false;
                 }
+
             }
 
-        // logic when AI is playing a move
-        } else {
-
-            if (move && move[0] == -1) {
-
-                // get the number of the field where stone was placed
-                const num = move[1];
-                // get the coordinates of the field
-                const index = numbers.indexOf(num);
-
-                if (move[2] == -1) {
-
-                    const pos = positions[index];
-                    const new_piece = new Stone('Black', svg, pos);
-                    new_piece.circle.addEventListener("click", (e) => {
-
-                        // here needs to be added logic to remove the enemies piece
-                        console.log(`Removing enemy piece on field ${num}`);
-
-                        // send the move to the backend
-                        sendMove(num);
-
-                        // need logic to check if move valid,
-                        // i.e. selected piece not iside a mill
-                        
-                        // remove piece on the frontend
-                        new_piece.circle.remove();
-                        delete pieces[pieces.indexOf(new_piece)];
-                        
-                    });
-                    new_piece.draw();
-                    pieces.push(new_piece);
-
-                } else {
-
-                    // get the target position
-                    const to_num = move[2];
-                    const idx = numbers.indexOf(to_num);
-                    const position = positions[idx];
-
-                    // search for the piece that has been moved
-                    // then execute move
-                    pieces.forEach(piece => {
-                        if (piece.num == num) {
-                            moving_piece.circle.setAttribute("cx", position[0]);
-                            moving_piece.circle.setAttribute("cy", position[1]);
-                        }
-                    })
-
-                }
-
-                is_player_turn = true;
+            // logic when piece is being removed
+            // a remove is indicated by 10
+            // search for the corresponding piece in pieces and delete
+            if (move[0] == 10) {
+                let idx = null;
+                pieces.forEach(piece => {
+                    if (piece.num == move[1]) {
+                        piece.circle.remove();
+                        idx = pieces.indexOf(piece);
+                    }
+                })
+                delete pieces[idx];
+            } else if (move[0] == 1000) {
+                hint.innerHTML = "Game ended";
             }
-        }
 
-        // logic when piece is being removed
-        // a remove is indicated by 10
-        // search for the corresponding piece in pieces and delete
-        if (move && move[0] == 10) {
-            let idx = null;
-            pieces.forEach(piece => {
-                if (piece.num == move[1]) {
-                    piece.circle.remove();
-                    idx = pieces.indexOf(piece);
-                }
-            })
-            delete pieces[idx];
-        }
+        });
     }, 500);
 
 });
@@ -270,8 +276,8 @@ async function sendMove(n, target=null) {
 // check for moves of the AI
 async function refreshOutput() {
   const r = await fetch("/api/game_output");
-  const { move, waitingForMove } = await r.json();
-  return move;
+  const { moves, waitingForMove } = await r.json();
+  return moves;
 }
 
 class Stone {
