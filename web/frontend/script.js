@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         is_player_turn = false;
                         player_send_move = false;
 
-                        hint.innerHTML = "Enemy turn";
+                        hint.innerHTML = "enemy turn";
                         
                     } else if (move[0] == 0) {
 
@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                     is_player_turn = true;
-                    hint.innerHTML = "Your turn";
+                    hint.innerHTML = "your turn";
                     
                 }
 
@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 delete pieces[idx];
             } else if (move[0] == 1000) {
-                hint.innerHTML = "Game ended";
+                hint.innerHTML = "game ended";
             }
 
         });

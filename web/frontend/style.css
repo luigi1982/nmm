@@ -16,3 +16,10 @@
   font-family: Arial, Helvetica, sans-serif;
   font-size: large;
 }
+
+#hint {
+  margin-top: 30px;     /* space from the top */
+  font-size: 24px;      /* make text larger */
+  font-weight: bold;    /* make it bold */
+  text-align: center;   /* keep it centered */
+}

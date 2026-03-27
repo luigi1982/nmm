@@ -1,3 +1,8 @@
+# Play the Game inside the Webbrowser
+
+http://212.227.91.135:3000/
+
+
 # Nine Men's Morris — Terminal AI (Rust)
 
 A terminal-based implementation of **Nine Men's Morris** featuring AI players built with classical game-tree search techniques.

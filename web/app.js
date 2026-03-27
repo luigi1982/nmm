@@ -29,9 +29,9 @@ app.use(express.static(path.join(__dirname, "frontend")));
 
 app.get("/api/start_game", (req, res) => {
   // Prevent starting multiple games accidentally
-  if (rustProc && !rustProc.killed) {
-    return res.json({ ok: true, alreadyRunning: true });
-  }
+  //if (rustProc && !rustProc.killed) {
+  //  return res.json({ ok: true, alreadyRunning: true });
+  //}
 
   console.log("Starting Rust process...");
   rustProc = spawn(RUST_BIN, ["1", "0", "1000", "1000"], {

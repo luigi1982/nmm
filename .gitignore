@@ -1,4 +1,6 @@
 /nmm-rust/target
 /web/node_modules
 
+comments.md
+
 .env
